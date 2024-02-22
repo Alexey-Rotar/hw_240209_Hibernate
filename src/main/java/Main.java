@@ -2,6 +2,10 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -20,11 +24,14 @@ public class Main {
         // Read
         System.out.println(read(1));
 
+        // Чтение коллекции данных
+        readAll();
+
         // Update
         update(2);
 
         // Delete
-        delete(3);
+        //delete(4);
     }
 
     /**
@@ -63,6 +70,23 @@ public class Main {
         }
     }
 
+    public static void readAll() {
+        try (SessionFactory sessionFactory = new Configuration()
+                .configure("hibernate.cfg.xml")
+                .addAnnotatedClass(Course.class)
+                .buildSessionFactory()) {
+            var entityManager = sessionFactory.createEntityManager();
+            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Course> criteriaQuery = criteriaBuilder.createQuery(Course.class);
+            Root<Course> notificationRoot = criteriaQuery.from(Course.class);
+            TypedQuery<Course> query = entityManager.createQuery(criteriaQuery);
+            List<Course> studentsList = query.getResultList();
+            for (Course student : studentsList) {
+                System.out.println(student);
+            }
+        }
+    }
+
     /**
      * Обновляет данные в таблице БД: увеличивает продолжительность курса на 10
      * @param id id курса
@@ -97,5 +121,63 @@ public class Main {
             session.getTransaction().commit();
         }
     }
+
+    // ---------------------- ПРИМЕР --------------------------
+
+//    try (sessionFactory) {
+//        Session session = sessionFactory.openSession();
+//        // Начало транзакции
+//        var transaction = session.beginTransaction();
+//
+//        // Создание объекта
+//        Student student1 = Student.create();
+//        Student student2 = Student.create();
+//        Student student3 = Student.create();
+//
+//        // Сохранение объекта в базе данных
+//        session.save(student1);
+//        session.save(student2);
+//        session.save(student3);
+//        System.out.println("Object student save successfully");
+//
+//        // Чтение объекта из базы данных
+//        Student retrievedStudent = session.get(Student.class, student1.getId());
+//        System.out.println("Object student retrieved successfully");
+//        System.out.println("Retrieved student object: " + retrievedStudent);
+//
+//        // Обновление объекта
+//        retrievedStudent.updateName();
+//        retrievedStudent.updateAge();
+//        session.update(retrievedStudent);
+//        System.out.println("Object student update successfully");
+//
+//        // Коммит (завершение/подтверждение изменений) транзакции
+//        transaction.commit();
+//
+//        // Чтение коллекции данных
+//        var entityManager = sessionFactory.createEntityManager();
+//        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+//        CriteriaQuery<Student> criteriaQuery = criteriaBuilder.createQuery(Student.class);
+//        Root<Student> notificationRoot = criteriaQuery.from(Student.class);
+//        TypedQuery<Student> query = entityManager.createQuery(criteriaQuery);
+//        List<Student> studentsList = query.getResultList();
+//        for (Student student : studentsList) {
+//            System.out.println(student);
+//        }
+//
+//        // Начало транзакции
+//        transaction = session.beginTransaction();
+//
+//        // Удаление объекта
+//        session.delete(retrievedStudent);
+//        System.out.println("Object student delete successfully");
+//
+//        // Коммит (завершение/подтверждение изменений) транзакции
+//        transaction.commit();
+//        System.out.println("Transaction commit successfully");
+//
+//    }
+
+
 
 }
